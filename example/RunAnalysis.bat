@@ -1,0 +1,1 @@
+mpiexec -n 5 OSPCR-MP.exe

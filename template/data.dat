@@ -1,0 +1,10 @@
+ID	SidesHeated(3/4?)	Protected?	composite?	thickness_flange	thickness_web	setion_depth	section_width	protection_thickness	protection_slab	thickness_slab	width_slab
+1	4	TRUE	FALSE	0.025	0.026419942	0.559109162	0.398586703	0.023256734	0.017851087	0.450630924	0.537659088
+
+
+Note that your data file MUST include ID as its first column, and the separation between the ID 
+and the next data entry MUST be a single tab (tab, the button on your keyboad above CapsLock). 
+This is done automatically if you prepare your data in excel and then copy it to the data.dat file.
+The first line is always there to help you organize your data and will be ignored in the analysis. 
+Your actual input arguments start from line 2 onwards. Now that you have read this message, you 
+should be able to create your own data files depending on the input your tcl script requires.
