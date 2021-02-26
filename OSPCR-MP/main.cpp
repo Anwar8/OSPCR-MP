@@ -14,9 +14,9 @@
 #define READY_TO_WORK 2
 #define WORKER_NOT_AVAILABLE -1
 #define MANAGER_RANK 0
-#define VERSION "1.0.0"
-
+#define VERSION "1.0.1"
 using namespace std;
+
 int get_rank_from_ready_worker();
 void send_job_to_worker(string& job, string& tempF, int worker_rank);
 void signal_to_manager_that_ready();
@@ -136,21 +136,20 @@ int main(int argc, char** argv) {
         for (int i = 0; i < IDs.size(); i++) {
             ifstream logFileHandle("log" + IDs[i] + ".log", ios::out | ios::binary);
             logFileHandle.seekg(-9,ios::end);
-            
             if (logFileHandle.is_open()) {
                 string finalLine;
                 if (getline(logFileHandle, finalLine)) {
-                    if (finalLine.compare("Success") > 0) {
+                    finalLine.pop_back();
+                    if (!finalLine.compare("Success")) {
                         myReportHandle << IDs[i] + "\tOK\n";
                     }
-                    else if (finalLine.compare("Failure") > 0) {
+                    else if (!finalLine.compare("Failure")) {
                         myReportHandle << IDs[i] + "\tNot OK\tPremature divergence. Check log file.\n";
                     }
                     else {
                         myReportHandle << IDs[i] + "\tNot OK\tother errors; analysis not started.\n";
                     }
-                }
-                
+                } 
             }
             logFileHandle.close();
         }
@@ -299,18 +298,14 @@ bool receive_job_from_manager(int my_rank) {
 }
 
 void do_job(string command, string tempFName, int my_rank) {
-    //cout << "Worker " << my_rank << " received command: " << command << " which is of length " << command.length() << endl;
     int outPut = system(command.c_str());
     ifstream ifs(tempFName);
     ifs.close();
     while (remove(tempFName.c_str()) != 0) {
-        //Sleep(3);
-        //perror("Error deleting temporary file");
-        //cout << tempFile;
-        // this while loop presents a huge weak point since if, for any reason, 
-        // the temporary file cannot be deleted then the loop will continue forever!
+         //this while loop presents a huge weak point since if, for any reason, 
+         //the temporary file cannot be deleted then the loop will continue forever!
     }
-    cout << "Worker " << my_rank << " completed the job." << endl;
+    std::cout << "Worker " << my_rank << " completed the job." << endl;
 }
 
 void terminate_worker(int worker_rank) {
