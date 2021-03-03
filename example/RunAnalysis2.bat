@@ -1,1 +1,1 @@
-mpiexec -n 5 OSPCR-MP.exe OpenSeesDEBUG3.2.1 HTTest4.tcl data.dat
+mpiexec -n 5 OSPCR-MP.exe OpenSeesDEBUG3.2.1 C:\Users\Anwar\Desktop\anlaysisFolder\HTTest4.tcl C:\Users\Anwar\Desktop\anlaysisFolder\data.dat

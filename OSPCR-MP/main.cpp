@@ -14,7 +14,7 @@
 #define READY_TO_WORK 2
 #define WORKER_NOT_AVAILABLE -1
 #define MANAGER_RANK 0
-#define VERSION "1.0.5"
+#define VERSION "1.0.6"
 
 using namespace std;
 int get_rank_from_ready_worker();
@@ -167,7 +167,7 @@ int main(int argc, char** argv) {
             cout << "report file created." << endl;
         }
         for (int i = 0; i < IDs.size(); i++) {
-            ifstream logFileHandle("log" + IDs[i] + ".log", ios::out | ios::binary);
+            ifstream logFileHandle("log\\log" + IDs[i] + ".log", ios::out | ios::binary);
             logFileHandle.seekg(-9,ios::end);
             if (logFileHandle.is_open()) {
                 string finalLine;
@@ -259,7 +259,14 @@ void get_data(ifstream& FileHandle, vector<string>& Lines, vector<string>& IDs, 
     {
         nJobs++;
         Lines.push_back(line);
-        IDs.push_back(line.substr(0, line.find('\t')));
+        string buffer;
+        int i = 0;
+        do {
+            buffer.push_back(line[i]);
+            i++;
+        } while (!isspace(line[i]));
+        IDs.push_back(buffer);
+        buffer.clear(); // maybe unnecessary? still, keeps things safe and is rather cheap.
     }
     //Ignore the first line
     Lines.erase(Lines.begin());
