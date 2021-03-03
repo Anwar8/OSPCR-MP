@@ -1,0 +1,1 @@
+mpiexec -n 5 OSPCR-MP.exe OpenSeesDEBUG3.2.1 HTTest4.tcl data.dat

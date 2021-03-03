@@ -14,9 +14,9 @@
 #define READY_TO_WORK 2
 #define WORKER_NOT_AVAILABLE -1
 #define MANAGER_RANK 0
-#define VERSION "1.0.1"
-using namespace std;
+#define VERSION "1.0.5"
 
+using namespace std;
 int get_rank_from_ready_worker();
 void send_job_to_worker(string& job, string& tempF, int worker_rank);
 void signal_to_manager_that_ready();
@@ -46,68 +46,101 @@ int main(int argc, char** argv) {
 
 
     if (world_rank == MANAGER_RANK) { /* manager part */
+        cout << "OSPCR-MP - Version " << VERSION << endl;
+        cout << "Analyses will be run on " << world_size << " processors. 1 manager and " << world_size - 1 << " workers." << endl;
         string tclFileName;
         string dataFileName;
         string OpenSeesDir;
-        cout << "OSPCR-MP - Version " << VERSION << endl;;
-        cout << "Please specify name of the OpenSees.exe being used if you changed its name. " << endl;
-        cout << "This program expects the .exe to be either:" << endl;
-        cout << "a) In the present working directory, or " << endl;
-        cout << "b) Its location was already added to the sytem path." << endl;;
-        cout << "Kindly note that this programme cannot check either for you and will terminate" << endl;
-        cout << "after getting all the file information if no OpenSees.exe is found." << endl;
-        if (getline(cin, OpenSeesDir)) {
-            if (OpenSeesDir.empty())
-            {
-                OpenSeesDir = "OpenSeesDEBUG3.2.1";
-                cout << "Default .exe name \"" << OpenSeesDir << "\" will be used." << endl;
+        if (argc >= 4) {
+            if (argc > 4) { cout << "Received " << argc << " arguments. Ignored additional arguments." << endl; }
+            OpenSeesDir = argv[1];
+            tclFileName = argv[2];
+            ifstream tclFileHandle(tclFileName.c_str());
+            if (!tclFileHandle.good()) {
+                string errMessage = "Error accessing tcl file \"" + tclFileName + "\"";
+                perror(errMessage.c_str());
+                system("PAUSE");
+                MPI_Finalize();
+                return -1;
             }
-        }
-        cout << endl << "Please specify tcl filename WITH extension. If nothing entered default \"run.tcl\" is used" << endl;
-        if (getline(cin, tclFileName)) {
-            if (tclFileName.empty())
-            {
-                tclFileName = "run.tcl";
-                cout << "Default tcl file name \"" << tclFileName << "\" will be used." << endl;
-            }
-        }
-        ifstream tclFileHandle(tclFileName.c_str());
-        if (!tclFileHandle.good()) {
-            string errMessage = "Error accessing tcl file \"" + tclFileName + "\"";
-            perror(errMessage.c_str());
-            system("PAUSE");
-            MPI_Finalize();
-            return -1;
-        }
-        else
-            cout << "tcl file \"" << tclFileName << "\" exists." << endl;
+            else
+                cout << "tcl file \"" << tclFileName << "\" exists." << endl;
 
-        cout << endl << "Please specify data filename WITH extension. If nothing entered default \"data.dat\" is used" << endl;
-        if (getline(cin, dataFileName)) {
-            if (dataFileName.empty())
-            {
-                dataFileName = "data.dat";
-                cout << "Default data file name \"" << dataFileName << "\" will be used." << endl;
+            dataFileName = argv[3];
+            ifstream dataFileHandle(dataFileName.c_str());
+            if (!dataFileHandle.good()) {
+                string errMessage = "Error accessing data file \"" + dataFileName + "\"";
+                perror(errMessage.c_str());
+                system("PAUSE");
+                MPI_Finalize();
+                return -1;
             }
-        }
-
-        ifstream dataFileHandle(dataFileName.c_str());
-        if (!dataFileHandle.good()) {
-            string errMessage = "Error accessing data file \"" + dataFileName + "\"";
-            perror(errMessage.c_str());
-            system("PAUSE");
-            MPI_Finalize();
-            return -1;
-        }
+            else 
+                cout << "data file \"" << dataFileName << "\" exists." << endl;
+        } 
         else {
-            cout << "data file \"" << dataFileName << "\" exists." << endl;
-            cout << "First line of data file will always be ignored, so be careful." << endl;
-        }
+            if (argc > 1) { cout << "Received " << argc << " arguments. Less than 4, so ignoring all arguments." << endl; }
 
+            cout << "Please specify name of the OpenSees.exe being used if you changed its name. " << endl;
+            cout << "This program expects the .exe to be either:" << endl;
+            cout << "a) In the present working directory, or " << endl;
+            cout << "b) Its location was already added to the sytem path." << endl;;
+            cout << "Kindly note that this programme cannot check either for you and will terminate" << endl;
+            cout << "after getting all the file information if no OpenSees.exe is found." << endl;
+            if (getline(cin, OpenSeesDir)) {
+                if (OpenSeesDir.empty())
+                {
+                    OpenSeesDir = "OpenSeesDEBUG3.2.1";
+                    cout << "Default .exe name \"" << OpenSeesDir << "\" will be used." << endl;
+                }
+            }
+            cout << endl << "Please specify tcl filename WITH extension. If nothing entered default \"run.tcl\" is used" << endl;
+            if (getline(cin, tclFileName)) {
+                if (tclFileName.empty())
+                {
+                    tclFileName = "run.tcl";
+                    cout << "Default tcl file name \"" << tclFileName << "\" will be used." << endl;
+                }
+            }
+            ifstream tclFileHandle(tclFileName.c_str());
+            if (!tclFileHandle.good()) {
+                string errMessage = "Error accessing tcl file \"" + tclFileName + "\"";
+                perror(errMessage.c_str());
+                system("PAUSE");
+                MPI_Finalize();
+                return -1;
+            }
+            else
+                cout << "tcl file \"" << tclFileName << "\" exists." << endl;
+
+            cout << endl << "Please specify data filename WITH extension. If nothing entered default \"data.dat\" is used" << endl;
+            if (getline(cin, dataFileName)) {
+                if (dataFileName.empty())
+                {
+                    dataFileName = "data.dat";
+                    cout << "Default data file name \"" << dataFileName << "\" will be used." << endl;
+                }
+            }
+
+            ifstream dataFileHandle(dataFileName.c_str());
+            if (!dataFileHandle.good()) {
+                string errMessage = "Error accessing data file \"" + dataFileName + "\"";
+                perror(errMessage.c_str());
+                system("PAUSE");
+                MPI_Finalize();
+                return -1;
+            }
+            else {
+                cout << "data file \"" << dataFileName << "\" exists." << endl;
+                cout << "First line of data file will always be ignored, so be careful." << endl;
+            }
+        }
         /* create 'jobs'*/
+        
         vector <string> arguments;
         vector <string> IDs;
         int nJobs = 0;
+        ifstream dataFileHandle(dataFileName.c_str());
         get_data(dataFileHandle, arguments, IDs, nJobs);
         vector <string> commandCalls;
         vector <string> tempFileNames;
