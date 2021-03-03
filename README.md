@@ -1,6 +1,10 @@
 # OpenSees Parametric Case Runner - Multi Processing
 OSPCR-MP leverages the inherent argv capabilities of the tcl language and the ability to launch .tcl scripts in OpenSees from the command prompt. Using this program you will be able to anlayse multiple parametric cases in OpenSees at the same time. Seeing how all my colleauges use Windows in the office, this program was designed for that platform exclusively. It will, unfortunately, not run on Unix systems. 
 
+## News
+### Version 1.0.1 released
+- Fixed bug with evaluation of analyses outcome - report.txt now correctly identifies successful and failed analyses. 
+
 ## Prerequisites
 - Multi-threaded Windows computer.
 - Installation of [Microsoft MPI][1].
