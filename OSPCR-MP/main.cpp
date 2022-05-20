@@ -14,7 +14,8 @@
 #define READY_TO_WORK 2
 #define WORKER_NOT_AVAILABLE -1
 #define MANAGER_RANK 0
-#define VERSION "1.0.6"
+#define VERSION "1.0.7"
+#define PAUSE 0
 
 using namespace std;
 int get_rank_from_ready_worker();
@@ -48,6 +49,7 @@ int main(int argc, char** argv) {
     if (world_rank == MANAGER_RANK) { /* manager part */
         cout << "OSPCR-MP - Version " << VERSION << endl;
         cout << "Analyses will be run on " << world_size << " processors. 1 manager and " << world_size - 1 << " workers." << endl;
+        /* read input arguments */
         string tclFileName;
         string dataFileName;
         string OpenSeesDir;
@@ -56,6 +58,7 @@ int main(int argc, char** argv) {
             OpenSeesDir = argv[1];
             tclFileName = argv[2];
             ifstream tclFileHandle(tclFileName.c_str());
+            /* check if tcl file is accessible */
             if (!tclFileHandle.good()) {
                 string errMessage = "Error accessing tcl file \"" + tclFileName + "\"";
                 perror(errMessage.c_str());
@@ -66,6 +69,7 @@ int main(int argc, char** argv) {
             else
                 cout << "tcl file \"" << tclFileName << "\" exists." << endl;
 
+            /* checks that data file is also accessible */
             dataFileName = argv[3];
             ifstream dataFileHandle(dataFileName.c_str());
             if (!dataFileHandle.good()) {
@@ -79,6 +83,7 @@ int main(int argc, char** argv) {
                 cout << "data file \"" << dataFileName << "\" exists." << endl;
         } 
         else {
+            /* rudimentary handling of inputs - if not the correct number of inputs, then the user has to type!! */
             if (argc > 1) { cout << "Received " << argc << " arguments. Less than 4, so ignoring all arguments." << endl; }
 
             cout << "Please specify name of the OpenSees.exe being used if you changed its name. " << endl;
@@ -90,7 +95,7 @@ int main(int argc, char** argv) {
             if (getline(cin, OpenSeesDir)) {
                 if (OpenSeesDir.empty())
                 {
-                    OpenSeesDir = "OpenSeesDEBUG3.2.1";
+                    OpenSeesDir = "OpenSees";
                     cout << "Default .exe name \"" << OpenSeesDir << "\" will be used." << endl;
                 }
             }
@@ -135,8 +140,8 @@ int main(int argc, char** argv) {
                 cout << "First line of data file will always be ignored, so be careful." << endl;
             }
         }
+
         /* create 'jobs'*/
-        
         vector <string> arguments;
         vector <string> IDs;
         int nJobs = 0;
@@ -188,7 +193,10 @@ int main(int argc, char** argv) {
         }
         myReportHandle.close();
         cout << "All jobs completed." << endl;
-        system("PAUSE");
+
+        // Pausing after completion is dependent on the defined variable "PAUSE"
+        if (PAUSE)
+            system("PAUSE");
 
     }
     else { /* worker part */
